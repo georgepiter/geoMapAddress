@@ -1,5 +1,6 @@
 package br.com.map.controller;
 
+import br.com.map.domain.exception.ApiMapsGeoCodePathNotFoundException;
 import br.com.map.dto.ApiMapsGeoCodeAddressDto;
 import br.com.map.service.ApiMapsGeoCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +17,12 @@ public class ApiMapsGeoCodeController {
     @Autowired
     private ApiMapsGeoCodeService apiMapsGeoCodeService;
 
-
-
     public ApiMapsGeoCodeController(ApiMapsGeoCodeService apiMapsGeoCodeService) {
         this.apiMapsGeoCodeService = apiMapsGeoCodeService;
     }
 
     @PostMapping
-    public ResponseEntity<ApiMapsGeoCodeAddressDto> getAddress(@RequestBody ApiMapsGeoCodeAddressDto address) {
+    public ResponseEntity<ApiMapsGeoCodeAddressDto> getAddress(@RequestBody ApiMapsGeoCodeAddressDto address) throws ApiMapsGeoCodePathNotFoundException {
 
         apiMapsGeoCodeService.buildAddress(address);
 
