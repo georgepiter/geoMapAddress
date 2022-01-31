@@ -1,46 +1,39 @@
 package br.com.map.resource;
 
 import br.com.map.domain.response.ApiMapsGeoCodeResponse;
-import feign.Feign;
-import feign.Logger;
-import feign.Request;
-import feign.Retryer;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
-import feign.slf4j.Slf4jLogger;
-
-import java.util.concurrent.TimeUnit;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 public class ApiMapsGeoCodeClient implements ApiMapsGeoCodeResource {
 
     private final String url;
-    private final long connectTimeout;
-    private final long readTimeout;
 
-    public ApiMapsGeoCodeClient(String url, long connectTimeout, long readTimeout) {
+    RestTemplate restTemplate = new RestTemplate();
+
+
+    public ApiMapsGeoCodeClient(String url) {
         this.url = url;
-        this.connectTimeout = connectTimeout;
-        this.readTimeout = readTimeout;
-    }
-
-    private ApiMapsGeoCodeResource getApi() {
-        return Feign.builder()
-                .options(new Request.Options(connectTimeout, TimeUnit.SECONDS, readTimeout, TimeUnit.SECONDS, true))
-                .decoder(new JacksonDecoder())
-                .encoder(new JacksonEncoder())
-                .retryer(Retryer.NEVER_RETRY)
-                .logLevel(Logger.Level.FULL)
-                .logger(new Slf4jLogger(ApiMapsGeoCodeClient.class))
-                .target(ApiMapsGeoCodeResource.class, url);
     }
 
     @Override
-    public ApiMapsGeoCodeResponse getGeoCodeApi(String address, String key) {
-        if(address == null || address.isEmpty()) {
-            throw new IllegalArgumentException("Address is required");
-        }
-        return getApi().getGeoCodeApi(address, key);
+    public ApiMapsGeoCodeResponse getGeoCodeApi(String key, String address) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(url)
+                .queryParam("address", address)
+                .queryParam("key", key);
+        return restTemplate
+                .exchange(builder.toUriString(),
+                        HttpMethod.GET,
+                        entity,
+                        ApiMapsGeoCodeResponse.class)
+                .getBody();
+
     }
-
-
 }

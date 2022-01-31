@@ -1,4 +1,4 @@
-package br.com.map.domain;
+package br.com.map.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,6 +21,10 @@ public class ApiMapsGeoCodeAddress {
 
     public ApiMapsGeoCodeAddress(){
         super();
+    }
+
+    public ApiMapsGeoCodeAddress(String street) {
+        this.street = street;
     }
 
     public String getStreet() {

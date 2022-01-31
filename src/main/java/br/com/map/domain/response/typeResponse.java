@@ -2,33 +2,28 @@ package br.com.map.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class typeResponse {
 
     @JsonProperty("types")
-    private List<String> type = new ArrayList<>();
+    private String type;
 
-    public typeResponse(List<String> type) {
+    public typeResponse(String type) {
         this.type = type;
     }
 
-    public typeResponse() {
-        super();
-    }
-
-    public List<String> getType() {
+    public String getType() {
         return type;
     }
 
-    public void setType(List<String> type) {
+    public void setType(String type) {
         this.type = type;
     }
 
     @Override
     public String toString() {
-        return "typeResponse{" + "type=" + type +
-                '}';
+        final StringBuilder type = new StringBuilder("typeResponse{");
+        type.append("type='").append(this.type).append('\'');
+        type.append('}');
+        return type.toString();
     }
 }

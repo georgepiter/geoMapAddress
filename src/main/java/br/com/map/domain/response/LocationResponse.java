@@ -2,17 +2,15 @@ package br.com.map.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.text.DecimalFormat;
-
 public class LocationResponse {
 
     @JsonProperty("lat")
-    private DecimalFormat latitude;
+    private Double latitude;
 
     @JsonProperty("lng")
-    private DecimalFormat longitude;
+    private Double longitude;
 
-    public LocationResponse(DecimalFormat latitude, DecimalFormat longitude) {
+    public LocationResponse(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -21,19 +19,19 @@ public class LocationResponse {
         super();
     }
 
-    public DecimalFormat getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(DecimalFormat latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public DecimalFormat getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(DecimalFormat longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 

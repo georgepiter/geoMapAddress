@@ -1,8 +1,10 @@
 package br.com.map.service;
 
-import br.com.map.domain.ApiMapsGeoCodeAddress;
 import br.com.map.domain.exception.ApiMapsGeoCodePathNotFoundException;
 import br.com.map.domain.response.ApiMapsGeoCodeResponse;
+import br.com.map.domain.response.ResultResponse;
+import br.com.map.dto.ApiMapsGeoCodeAddress;
+import br.com.map.dto.GeoCodeAddressCustom;
 import br.com.map.resource.ApiMapsGeoCodeClient;
 import br.com.map.utils.ApiMapsGeoCodeConstants;
 import org.springframework.stereotype.Service;
@@ -10,32 +12,53 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiMapsGeoCodeApiService {
 
-    public ApiMapsGeoCodeResponse getGeolocation(ApiMapsGeoCodeAddress address) throws ApiMapsGeoCodePathNotFoundException {
-        String key = ApiMapsGeoCodeAuthentication.getCredential().getProperty(ApiMapsGeoCodeConstants.PROP_KEY);
-        ApiMapsGeoCodeAddress request = new ApiMapsGeoCodeAddress();
-        request.setStreet(address.getStreet());
-        request.setNumber(address.getNumber());
-        request.setZipCode(address.getZipCode());
-        ApiMapsGeoCodeResponse geoCodeResponse = getClient().getGeoCodeApi(buildStringAddress(request), key);
 
-        return null;
+    public GeoCodeAddressCustom getGeolocation(ApiMapsGeoCodeAddress address) throws ApiMapsGeoCodePathNotFoundException {
+
+        String key = ApiMapsGeoCodeAuthentication.getCredential().getProperty(ApiMapsGeoCodeConstants.PROP_KEY);
+
+        ApiMapsGeoCodeResponse geoCodeApiResponse = getClient().getGeoCodeApi(key, buildStringAddress(address));
+
+        return buildAddressCustom(geoCodeApiResponse, address);
+    }
+
+
+    private GeoCodeAddressCustom buildAddressCustom(ApiMapsGeoCodeResponse apiMapsGeoCodeResponse,
+                                                    ApiMapsGeoCodeAddress address) {
+        GeoCodeAddressCustom newGeoCodeAddressCustom = new GeoCodeAddressCustom();
+
+        if (apiMapsGeoCodeResponse.getResults().isEmpty()) {
+            newGeoCodeAddressCustom.setFormattedAddress("Address not found  in google API callback");
+            newGeoCodeAddressCustom.setStreet(address.getStreet());
+            newGeoCodeAddressCustom.setLatitude(0.0);
+            newGeoCodeAddressCustom.setLongitude(0.0);
+            newGeoCodeAddressCustom.setMessage("Address not found  in google API callback");
+        } else {
+            for (ResultResponse resultResponse : apiMapsGeoCodeResponse.getResults()) {
+                newGeoCodeAddressCustom.setFormattedAddress(resultResponse.getFormattedAddress());
+                newGeoCodeAddressCustom.setLatitude(resultResponse.getGeometry().getLocation().getLatitude());
+                newGeoCodeAddressCustom.setLongitude(resultResponse.getGeometry().getLocation().getLongitude());
+                newGeoCodeAddressCustom.setMessage("Address found successfully in google API callback");
+                newGeoCodeAddressCustom.setStreet(address.getStreet());
+            }
+        }
+
+        return newGeoCodeAddressCustom;
 
     }
 
-    private String buildStringAddress (ApiMapsGeoCodeAddress request) {
+
+    private String buildStringAddress(ApiMapsGeoCodeAddress address) {
         StringBuilder stringBuilder = new StringBuilder();
         return stringBuilder
-                .append(request.getStreet()).append("+")
-                .append(request.getNumber()).append("+")
-                .append(request.getZipCode())
-                .toString();
+                .append(address.getStreet()).append("-")
+                .append(address.getNumber()).append("-")
+                .append(address.getZipCode()).toString();
     }
 
     public ApiMapsGeoCodeClient getClient() throws ApiMapsGeoCodePathNotFoundException {
         return new ApiMapsGeoCodeClient(
-                ApiMapsGeoCodeAuthentication.getCredential().getProperty(ApiMapsGeoCodeConstants.PROP_URL),
-                ApiMapsGeoCodeConstants.CONNECT_TIME_OUT, ApiMapsGeoCodeConstants.READ_TIME_OUT
-        );
+                ApiMapsGeoCodeAuthentication.getCredential().getProperty(ApiMapsGeoCodeConstants.PROP_URL));
     }
 
 
