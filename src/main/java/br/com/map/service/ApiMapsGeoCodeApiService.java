@@ -1,5 +1,6 @@
 package br.com.map.service;
 
+import br.com.map.domain.exception.ApiMapsGeoCodeAddressNotFoundException;
 import br.com.map.domain.exception.ApiMapsGeoCodePathNotFoundException;
 import br.com.map.domain.response.ApiMapsGeoCodeResponse;
 import br.com.map.domain.response.ResultResponse;
@@ -12,27 +13,23 @@ import org.springframework.stereotype.Service;
 @Service
 public class ApiMapsGeoCodeApiService {
 
-
     public GeoCodeAddressCustom getGeolocation(ApiMapsGeoCodeAddress address) throws ApiMapsGeoCodePathNotFoundException {
 
         String key = ApiMapsGeoCodeAuthentication.getCredential().getProperty(ApiMapsGeoCodeConstants.PROP_KEY);
-
-        ApiMapsGeoCodeResponse geoCodeApiResponse = getClient().getGeoCodeApi(key, buildStringAddress(address));
-
-        return buildAddressCustom(geoCodeApiResponse, address);
+        try {
+            ApiMapsGeoCodeResponse geoCodeApiResponse = getClient().getGeoCodeApi(key, buildStringAddress(address));
+            return buildAddressCustom(geoCodeApiResponse, address);
+        } catch (ApiMapsGeoCodeAddressNotFoundException e) {
+            throw new ApiMapsGeoCodeAddressNotFoundException("Address not found in google API callback" );
+        }
     }
-
 
     private GeoCodeAddressCustom buildAddressCustom(ApiMapsGeoCodeResponse apiMapsGeoCodeResponse,
                                                     ApiMapsGeoCodeAddress address) {
         GeoCodeAddressCustom newGeoCodeAddressCustom = new GeoCodeAddressCustom();
 
         if (apiMapsGeoCodeResponse.getResults().isEmpty()) {
-            newGeoCodeAddressCustom.setFormattedAddress("Address not found  in google API callback");
-            newGeoCodeAddressCustom.setStreet(address.getStreet());
-            newGeoCodeAddressCustom.setLatitude(0.0);
-            newGeoCodeAddressCustom.setLongitude(0.0);
-            newGeoCodeAddressCustom.setMessage("Address not found  in google API callback");
+            throw new ApiMapsGeoCodeAddressNotFoundException("Address not found in google API callback");
         } else {
             for (ResultResponse resultResponse : apiMapsGeoCodeResponse.getResults()) {
                 newGeoCodeAddressCustom.setFormattedAddress(resultResponse.getFormattedAddress());
@@ -42,11 +39,8 @@ public class ApiMapsGeoCodeApiService {
                 newGeoCodeAddressCustom.setStreet(address.getStreet());
             }
         }
-
         return newGeoCodeAddressCustom;
-
     }
-
 
     private String buildStringAddress(ApiMapsGeoCodeAddress address) {
         StringBuilder stringBuilder = new StringBuilder();
@@ -60,6 +54,4 @@ public class ApiMapsGeoCodeApiService {
         return new ApiMapsGeoCodeClient(
                 ApiMapsGeoCodeAuthentication.getCredential().getProperty(ApiMapsGeoCodeConstants.PROP_URL));
     }
-
-
 }

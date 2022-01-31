@@ -1,5 +1,7 @@
 package br.com.map.dto;
 
+import java.util.Objects;
+
 public class GeoCodeAddressCustom {
 
     private String formattedAddress;
@@ -8,6 +10,7 @@ public class GeoCodeAddressCustom {
     private String message;
     private String street;
     private Double distance;
+    private String comparedAddress;
 
     public GeoCodeAddressCustom(String formattedAddress, Double latitude, Double longitude) {
         this.formattedAddress = formattedAddress;
@@ -67,6 +70,27 @@ public class GeoCodeAddressCustom {
         this.distance = distance;
     }
 
+    public String getComparedAddress() {
+        return comparedAddress;
+    }
+
+    public void setComparedAddress(String comparedAddress) {
+        this.comparedAddress = comparedAddress;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GeoCodeAddressCustom that = (GeoCodeAddressCustom) o;
+        return Objects.equals(formattedAddress, that.formattedAddress) && Objects.equals(latitude, that.latitude) && Objects.equals(longitude, that.longitude) && Objects.equals(message, that.message) && Objects.equals(street, that.street) && Objects.equals(distance, that.distance) && Objects.equals(comparedAddress, that.comparedAddress);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(formattedAddress, latitude, longitude, message, street, distance, comparedAddress);
+    }
+
     @Override
     public String toString() {
         final StringBuilder adressCustom = new StringBuilder("GeoCodeAddressCustom{");
@@ -75,6 +99,7 @@ public class GeoCodeAddressCustom {
         adressCustom.append(", longitude=").append(longitude);
         adressCustom.append(", message=").append(message);
         adressCustom.append(", distance=").append(distance);
+        adressCustom.append(", comparedAddress='").append(comparedAddress).append('\'');
         adressCustom.append('}');
         return adressCustom.toString();
     }
